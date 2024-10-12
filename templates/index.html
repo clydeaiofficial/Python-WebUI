@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClydeAI Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #chat-container {
+            height: 400px;
+            border: 1px solid #ccc;
+            overflow-y: scroll;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        #user-input {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        #send-button {
+            width: 100%;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>ClydeAI Chat</h1>
+    <div id="chat-container"></div>
+    <input type="text" id="user-input" placeholder="Type your message...">
+    <button id="send-button">Send</button>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var messages = []; // Array to store conversation history
+
+            function addMessage(role, content) {
+                messages.push({role: role, content: content});
+                var sender = role === 'user' ? 'You' : 'ClydeAI';
+                $('#chat-container').append(`<p><strong>${sender}:</strong> ${content}</p>`);
+                $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
+            }
+
+            $('#send-button').click(function() {
+                var message = $('#user-input').val();
+                if (message) {
+                    addMessage('user', message);
+                    $('#user-input').val('');
+
+                    $.ajax({
+                        url: '/chat',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({messages: messages}),
+                        success: function(response) {
+                            addMessage('assistant', response.response);
+                        }
+                    });
+                }
+            });
+
+            $('#user-input').keypress(function(e) {
+                if (e.which == 13) {
+                    $('#send-button').click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
